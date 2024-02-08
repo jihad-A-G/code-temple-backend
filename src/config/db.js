@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
-function connectDB(MONGO_URI) {
+const connectDB=(MONGO_URI) =>{
   return new Promise((resolve, reject) => {
     // Use mongoose to connect to the MongoDB database using the provided URI.
     mongoose
@@ -21,4 +21,4 @@ function connectDB(MONGO_URI) {
   });
 }
 
-module.exports = connectDB;
+export default connectDB
