@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema({
     },
     developerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "developers",
+        ref: "developer",
         required: true, 
         },
 })

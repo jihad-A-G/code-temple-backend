@@ -125,13 +125,13 @@ export const requestResetPassword = async(req,res,next) =>{
         if(!developer){
             return res.status(404).json({message:'User not found'});
         }
-        const token = jwt.sign({data:'reset password'},process.env.RESET_PASSWORD_SECRET_KEY,{expiresIn:'1h'});
+        const token = jwt.sign({data:developer._id},process.env.RESET_PASSWORD_SECRET_KEY,{expiresIn:'1h'});
         await sendgrid.send({
             to:`${email}`,
             from:'jihadabdlghani73@gmail.com',
             subject:'Reset Password',
             html:`
-            <p>Please click on this <a href='http://localhost:3000/api/auth/resetPassword/${token}'>Link</a> to reset your password.</p>
+            <p>Please click on this <a href='http://localhost:3000/set-password/${token}'>Link</a> to reset your password.</p>
             `
         });
         res.status(200).json({message:'Email Sent'});
@@ -141,11 +141,12 @@ export const requestResetPassword = async(req,res,next) =>{
 }
 
 export const resetPassword = async(req,res,next) =>{
-    const {password,developerId,token} = req.body;
+    const {password,token} = req.body;
     try{ 
-            if(jwt.verify(token,process.env.RESET_PASSWORD_SECRET_KEY) && password){
+        const decoded = jwt.verify(token,process.env.RESET_PASSWORD_SECRET_KEY) 
+            if(decoded && password){
         const hashedPassword= await bcrypt.hash(password,12);
-        const developer = await Developer.findByIdAndUpdate(developerId,{password:hashedPassword},);
+        const developer = await Developer.findByIdAndUpdate(decoded.data,{password:hashedPassword});
         return res.status(200).json({developer:developer,message:'Password cahnged successfully!'});
     }
     res.status(400).json({message:'Token is not valid, request new one!'});

@@ -1,14 +1,21 @@
 import Post from "../models/postModel.js"
-
+import Comment from "../models/commentModel.js"
 export const getPosts = async (req,res,next) =>{
     try {
-        const posts = await Post.find()
-
-        if(!posts){
+        let posts = await Post.find()
+        
+        const postsWithComments = await Promise.all(posts.map(async (post) => {
+            const comments = await Comment.find({ postId: post._id });
+            post = {...post, comments:comments}
+            console.log(post);
+            return post;
+          }));
+        //   console.log(postsWithComments);
+        if(!postsWithComments){
             return res.status(404).json({status:404, message:'No posts'})
         }
 
-        res.status(200).json({status:200, posts:posts})
+        res.status(200).json({status:200, posts:postsWithComments})
 
     } catch (err) {
         next(err)
@@ -39,6 +46,7 @@ export const getPostById = async(req,res,next) =>{
 
 export const addPost = async(req,res,next) =>{
     const {description, code, language} = req.body
+    console.log(req.developer._id);
     
     try {
 
@@ -84,8 +92,39 @@ export const updatePost = async(req,res,next) =>{
     }
 }
 
+export const updatePostCode = async(req,res,next) =>{
+    const {postId} = req.params
+    const {v,code} = req.body
+
+    try {
+
+        if(!code || !v){
+            return res.status(400).json({status:400, message:'All fields are required'})
+        }
+
+        const post = await Post.findById(postId)
+
+        if(!post){
+            return res.status(404).json({status:404, message:'Post not found'})
+        }
+
+        post.versions.map(version =>{
+            if(version.v ===v){
+                version.code = code
+            }
+        })
+
+        await post.save()
+
+        res.status(200).json({status:200, message:`Code at version: ${v} was updated suucessfully`})
+        
+    } catch (err) {
+        next
+    }
+}
+
 export const deletePost = async(req,res,next) =>{
-    const {postId} = req.body
+    const {postId} = req.params
 
     try {
 

@@ -7,6 +7,7 @@ router.get('/',postController.getPosts)
 router.get('/:postId',postController.getPostById)
 router.post('/',postController.addPost)
 router.put('/:postId',postController.updatePost)
+router.put('/code/:postId',postController.updatePostCode)
 router.delete('/:postId',postController.deletePost)
 
 export default router

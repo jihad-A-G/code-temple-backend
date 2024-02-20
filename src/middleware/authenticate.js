@@ -1,7 +1,7 @@
 import Developer from '../models/developerModel.js'
 import  jwt  from 'jsonwebtoken'
-import dotenv from 'dotenv'
-dotenv.config()
+// import dotenv from 'dotenv'
+// dotenv.config()
 
 const authenticate = async(req,res,next) =>{
     const token = req.headers['authorization']
@@ -10,15 +10,13 @@ const authenticate = async(req,res,next) =>{
         if(!token){
             return res.status(401).json({status:401, message: 'Invalid token!'})
         }
-        const decoded =  jwt.verify(token.split(' ')[1], process.env.TOKEN_SECRET_KEY)
-
-        console.log(decoded);
+        const decoded = jwt.verify(token.split(' ')[1], process.env.TOKEN_SECRET_KEY)
 
         if(!decoded){
             return res.status(401).json({status:401, message:'User not found'})
         }
 
-        req.developer = decoded
+        req.developer = decoded.developer
         next()
     } catch (err) {
         next(err)

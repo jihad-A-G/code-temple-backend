@@ -9,6 +9,10 @@ dotenv.config()
 import connectDB from './config/db.js';
 import authRouter from './routes/authRoutes.js'
 import postRouter from './routes/postRoutes.js'
+import commentRouter from './routes/commentRoutes.js'
+import updateRequestRouter from './routes/updateRequestRoutes.js';
+import roomRouter from './routes/roomRoutes.js'
+import messageRouter from './routes/messageRoutes.js'
 import authenticate from './middleware/authenticate.js';
 // Initialize an Express application
 const app = express();
@@ -28,16 +32,20 @@ app.use(express.json()); // Parse JSON request bodies
 
 //Routers go here
 
-app.use('/api/auth',rateLimit,authRouter)
+app.use('/api/auth',authRouter)
 app.use(authenticate)
 app.use('/api/posts',postRouter)
-
+app.use('/api/comments',commentRouter)
+app.use('/api/requests',updateRequestRouter)
+app.use('/api/rooms',roomRouter)
+app.use('/api/messages',messageRouter)
 
 //error middlware
 app.use((err, req, res, next) => {
   console.error(err.stack); 
   res.status(500).send('Internal server error');
 });
+
 // Connect to the database
 await connectDB(process.env.MONGO_URI)
 
