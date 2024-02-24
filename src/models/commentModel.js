@@ -5,6 +5,10 @@ const commentSchema = new mongoose.Schema({
             type:String,
             required:true
         },
+        upVote:{
+            type:Number,
+            default:0
+        },
         postId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "post",

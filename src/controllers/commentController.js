@@ -67,3 +67,25 @@ export const deleteComment = async(req,res,next) =>{
         next(err)
     }
 }
+
+export const upVoteComment = async(req,res,next) =>{
+    const {commentId} = req.params
+    
+    try {
+        
+        const comment = await Comment.findById(commentId)
+
+        if(!comment){
+            return res.status(404).json({status:404, message:'Comment not found'})
+        }
+
+        comment.upVote++
+
+        await comment.save()
+
+        res.status(200).json({status:200, message:'Comment is up voted'})
+
+    } catch (err) {
+        next(err)
+    }
+}
