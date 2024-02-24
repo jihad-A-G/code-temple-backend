@@ -11,7 +11,7 @@ export const getPosts = async (req,res,next) =>{
             return post;
           }));
         //   console.log(postsWithComments);
-        if(!postsWithComments){
+        if(!postsWithComments || postsWithComments.length ==0){
             return res.status(404).json({status:404, message:'No posts'})
         }
 
@@ -46,8 +46,7 @@ export const getPostById = async(req,res,next) =>{
 
 export const addPost = async(req,res,next) =>{
     const {description, code, language} = req.body
-    console.log(req.developer._id);
-    
+    console.log(description,code,language);
     try {
 
         if(!description || !code || !language){
@@ -61,7 +60,7 @@ export const addPost = async(req,res,next) =>{
             }],
             description:description,
             language:language,
-            developerId:req.developer._id
+            developerId:'65d665e7a89d692e30b92084'
         })
 
         res.status(200).json({status:200, message:'Post was created successfully', post:post})

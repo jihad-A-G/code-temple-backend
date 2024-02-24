@@ -33,7 +33,7 @@ app.use(express.json()); // Parse JSON request bodies
 //Routers go here
 
 app.use('/api/auth',authRouter)
-app.use(authenticate)
+// app.use(authenticate)
 app.use('/api/posts',postRouter)
 app.use('/api/comments',commentRouter)
 app.use('/api/requests',updateRequestRouter)
