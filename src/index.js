@@ -14,6 +14,8 @@ import updateRequestRouter from './routes/updateRequestRoutes.js';
 import roomRouter from './routes/roomRoutes.js'
 import messageRouter from './routes/messageRoutes.js'
 import authenticate from './middleware/authenticate.js';
+import io from './config/socket-io.js'
+import {createServer} from 'http'
 // Initialize an Express application
 const app = express();
 
@@ -25,7 +27,11 @@ const apiLimiter = rateLimit({
 });
 
 // Use various middleware
-app.use(cors()); // Enable CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  credentials: true
+ })); // Enable CORS
 app.use(helmet()); // Set security HTTP headers
 app.use(morgan('dev')); // Log HTTP requests to the console in 'dev' format
 app.use(express.json()); // Parse JSON request bodies
@@ -33,7 +39,7 @@ app.use(express.json()); // Parse JSON request bodies
 //Routers go here
 
 app.use('/api/auth',authRouter)
-// app.use(authenticate)
+app.use(authenticate)
 app.use('/api/posts',postRouter)
 app.use('/api/comments',commentRouter)
 app.use('/api/requests',updateRequestRouter)
@@ -49,7 +55,24 @@ app.use((err, req, res, next) => {
 // Connect to the database
 await connectDB(process.env.MONGO_URI)
 
+//connect to socket io
+const httpServer = createServer(app)
+
+ io.attach(httpServer)
+
+
+io.on('connection', (socket)=>{
+  console.log('Client id: ',socket.id);
+  socket.on('joinRoom',(roomId)=>{
+    socket.join(roomId)
+    console.log(
+      'client joined the room'
+    );
+  })
+  io.on('disconnect',()=>console.log('Client Disconnected'))
+})
+
 // Start the server on the port specified in the environment variables
-app.listen(process.env.PORT, () => {
+httpServer.listen(process.env.PORT, () => {
   console.log(`Server started on port ${process.env.PORT}`);
 });

@@ -15,7 +15,7 @@ const messageShcema = new mongoose.Schema({
             ref: "developer",
             required: true, 
         },
-})
+},{timestamps:true})
 
 const Message = mongoose.model('message',messageShcema)
 

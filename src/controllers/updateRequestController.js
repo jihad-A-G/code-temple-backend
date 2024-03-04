@@ -2,7 +2,7 @@ import Request from '../models/updateRequestModel.js'
 import Post from '../models/postModel.js'
 import mongoose from 'mongoose'
 export const requestUpdate = async(req,res,next) =>{
-    const {code} = req.body
+    const {code, description} = req.body
     const {postId} = req.params
 
     try {
@@ -11,11 +11,11 @@ export const requestUpdate = async(req,res,next) =>{
             return res.status(404).json({status:404, message:'Post not found'})
         }
         
-        if(!code){
-            return res.status(404).json({status:404, message:'request is empty'})
+        if(!code || !description){
+            return res.status(404).json({status:404, message:'All field are required!'})
         }
 
-        const request = await Request.create({code:code, developerId:req.developer._id, postId:postId})
+        const request = await Request.create({description:description,code:code, developerId:req.developer._id, postId:postId})
 
         res.status(200).json({status:200, message:'request was created successfully', request})
 
@@ -26,7 +26,7 @@ export const requestUpdate = async(req,res,next) =>{
 
 export const updateRequest = async(req,res,next) =>{
     const {requestId} = req.params
-    const {code} = req.body
+    const {code,description} = req.body
 
     try {
 
@@ -46,6 +46,7 @@ export const updateRequest = async(req,res,next) =>{
         }
 
         request.code = code
+        request.description = description
 
         await request.save()
 
@@ -115,19 +116,34 @@ export const getPostRequests = async(req,res,next) =>{
     try {
         
         if(!postId){
-            return res.statua(404).json({status:404, message:'Incorrect id'})
+            return res.status(404).json({status:404, message:'Incorrect id'})
         }
 
-        const requests = await Request.find({postId:postId,approve:false})
-        console.log(requests);
+        const requests = await Request.find({postId:postId,approve:false}).populate('developerId')
 
         if(!requests){
-            return res.statua(404).json({status:404, message:'No requests'})
+            return res.status(404).json({status:404, message:'No requests'})
         }
 
         res.status(200).json({status:200, requests})
 
 
+    } catch (err) {
+        next(err)
+    }
+}
+
+export const getRequestById = async(req,res,next) =>{
+    const {requestId} = req.params
+
+    try {
+        if(!requestId){
+            return res.status(404).json({status:404, message:'Incorrect id'})
+        }
+
+        const request = await Request.findById(requestId).populate('developerId postId')
+
+        res.status(200).json({status:200, request})
     } catch (err) {
         next(err)
     }

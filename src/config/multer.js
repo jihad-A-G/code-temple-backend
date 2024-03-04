@@ -2,7 +2,7 @@ import multer from "multer";
 //Specify where to store the app images (the images folder), and how the naming should be.
 const storage = multer.diskStorage({
     destination: (req,file,cb)=>{
-        cb(null,'images');
+        cb(null,'../images');
     },
     filename:(req,file,cb) =>{
         cb(null, `${file.originalname}`);

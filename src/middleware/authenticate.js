@@ -17,6 +17,7 @@ const authenticate = async(req,res,next) =>{
         }
 
         req.developer = decoded.developer
+        // console.log(req.developer._id);
         next()
     } catch (err) {
         next(err)

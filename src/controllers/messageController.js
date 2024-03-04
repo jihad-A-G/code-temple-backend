@@ -1,3 +1,4 @@
+import io from '../config/socket-io.js'
 import Message from '../models/messageModel.js'
 
 export const addMessage = async(req,res,next) =>{
@@ -19,6 +20,8 @@ export const addMessage = async(req,res,next) =>{
             roomId:roomId,
             developerId:req.developer._id
         })
+
+        io.to(roomId).emit('newMessage', message)
 
         res.status(200).json({status:200, message:'Message was created successfully', message:message})
 

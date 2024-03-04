@@ -14,7 +14,7 @@ export const AddComment = async(req,res,next) =>{
             return res.status(404).json({status:404, message:'Comment is empty'})
         }
 
-        const comment = await Comment.create({content:content, developerId:req.developer._id, postId:postId})
+        const comment = await Comment.create({content:content, developerId:req.developer._id, postId:postId})//ALERTTTTTTTTT
 
         res.status(200).json({status:200, message:'Comment was created successfully', comment})
 

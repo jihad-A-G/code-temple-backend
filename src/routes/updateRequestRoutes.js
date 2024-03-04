@@ -5,6 +5,7 @@ const router = express.Router()
 
 
 router.post('/add/:postId',updateRequestController.requestUpdate)
+router.get('/id/:requestId', updateRequestController.getRequestById)
 router.get('/:postId',updateRequestController.getPostRequests)
 router.post('/approve/:requestId', updateRequestController.approveRequest)
 router.put('/:requestId',updateRequestController.updateRequest)

@@ -5,6 +5,10 @@ const updateRequestSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    description:{
+        type:String, 
+        required:true
+    },
     approve:{
         type:Boolean,
         default:false
@@ -19,7 +23,7 @@ const updateRequestSchema = new mongoose.Schema({
         ref: "developer",
         required: true, 
     },
-})
+},{timestamps:true})
 
 const Request = mongoose.model('updateRequest', updateRequestSchema)
 

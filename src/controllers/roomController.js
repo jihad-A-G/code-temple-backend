@@ -1,6 +1,6 @@
 import Message from '../models/messageModel.js'
 import Room from '../models/roomModel.js'
-
+import mongoose from 'mongoose'
 export const createRoom = async(req,res,next) =>{
         const {roomName, secretKey} = req.body
 
@@ -44,8 +44,13 @@ export const deleteRoom = async(req,res,next) =>{
 
 export const getRooms = async(req,res,next) =>{
     try {
-        
-        const rooms = await Room.find({$or:[{developerId:req.developer._id},{members:{$in:[req.developer._id]}}]})
+        const ObjectId = mongoose.Types.ObjectId
+        const id = new ObjectId(req.developer._id);
+        const rooms = await Room.find({$or: [
+            { developerId: id },
+            { 'members._id': { $in: [id] } } 
+         ]
+    })
 
         if(!rooms){
             return res.status(404).json({status:404, message:'No rooms!'})
@@ -60,7 +65,6 @@ export const getRooms = async(req,res,next) =>{
 
 export const joinRoom = async(req,res,next) =>{
     const {secretKey} = req.body
-
     try {
         
         if(!secretKey){
@@ -68,12 +72,13 @@ export const joinRoom = async(req,res,next) =>{
         }
 
         const room = await Room.findOne({secretKey:secretKey})
+        // console.log(room);
 
         if(!room){
             return res.status(404).json({status:404, message:'Room not found!'})
         }
 
-        if(room.members.some(d=>d._id === req.developer._id) || room.developerId == req.developer._id){
+        if(room.members.some(d=>d._id.toString() === req.developer._id.toString()) || room.developerId.toString() === req.developer._id.toString()){
             return res.status(400).json({status:400, message:'You are already a member'})
         }
 
@@ -81,7 +86,7 @@ export const joinRoom = async(req,res,next) =>{
 
         await room.save()
 
-        res.status(200).json({status:200, message:'You joined the room successfully'})
+        res.status(200).json({status:200, message:'You joined the room successfully',room})
 
     } catch (err) {
         next(err)
@@ -100,7 +105,7 @@ export const openRoom = async(req,res,next) =>{
         const room = await Room.findById(roomId)
         const messages = await Message.find({roomId:roomId}).populate({
             path:'developerId',
-            select:'username -_id'
+            select:'username'
         })
 
         if(!room ){

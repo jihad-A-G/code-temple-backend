@@ -3,6 +3,9 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import sendgrid from '@sendgrid/mail'
 import dotenv from 'dotenv'
+import Post from "../models/postModel.js";
+import Request from "../models/updateRequestModel.js";
+import Comment from "../models/commentModel.js";
 dotenv.config()
 
 sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
@@ -28,30 +31,8 @@ export const signup = async(req,res,next) =>{
             password:hashedPassword,
         })
 
+        res.status(200).json({status:200, message:'User signed up successfully'})
 
-        const token = jwt.sign({developer},process.env.TOKEN_SECRET_KEY,{expiresIn:'24h'})
-
-        res.status(200).json({status:200, message:'User signed up successfully', token:token})
-
-        await sendgrid.send({
-            to:`${email}`,
-            from:'jihadabdlghani73@gmail.com',
-            subject:'Email Verification',
-            html:`
-            <p>Hi there,</p>
-
-            <p>Thank you for signing up for code temple. Click on the link below to verify your email:</p>
-            
-           <a href='http://localhost:3000/verify-email/?token=${token}'>verify your email</a> 
-            
-            <p>This link will expire in 24 hours. If you did not sign up for a code temple account,
-            you can safely ignore this email.</p>
-            
-           <p> Best,</p>
-            
-            <p>The code temple Team</p>
-            `
-        });
         
     } catch (err) {
         next(err)
@@ -60,7 +41,7 @@ export const signup = async(req,res,next) =>{
 
 
 export const verifyEmail = async(req,res,next) =>{
-    const {token} = req.query
+    const {token} = req.body
 
     try {
         if(!token){
@@ -68,8 +49,9 @@ export const verifyEmail = async(req,res,next) =>{
         }
 
         const decoded = jwt.verify(token, process.env.TOKEN_SECRET_KEY)
+        console.log(decoded);
 
-        const developerId=  decoded._id
+        const developerId=  decoded.developer._id
 
         const developer = await Developer
         .findById(developerId)
@@ -83,6 +65,7 @@ export const verifyEmail = async(req,res,next) =>{
         await developer.save()
 
         res.status(200).json({status:200, message:'Email was verified successfully!'})
+        console.log('Meshi l 7al');
         
     } catch (err) {
         next(err)
@@ -155,3 +138,52 @@ export const resetPassword = async(req,res,next) =>{
 }
 
 }
+
+export const getProfile = async(req,res,next) =>{
+    const {developerId} = req.params
+
+    try {
+        
+        if(!developerId){
+            return res.status(404).json({status:404, message:'Incorrect id'})
+        }
+        const developer = await Developer.findById(developerId)
+        const postsNumber = await Post.countDocuments({developerId:developerId})
+        const requestsNumber = await Request.countDocuments({developerId:developerId})
+        const commentsNumber = await Comment.countDocuments({developerId:developerId})
+
+        res.status(200).json({status:200,developer,postsNumber,requestsNumber, commentsNumber})
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+export const updateDeveloper = async(req,res,next)=>{
+    const {developerId} = req.params
+    const {username,email,password,bio, oldImage} = req.body
+    const image = req.file
+    console.log(image);
+
+    try {
+        if(!developerId){
+            return res.status(404).json({status:404, message:'Incorrect id'})
+        }
+        if(!username || !email){
+            return res.status(400).json({status:400, message:'Fields are required'})
+        }
+
+        const developer = await Developer.findById(developerId)
+
+        developer.username = username
+        developer.email = email
+        developer.password= password
+        developer.bio = bio
+        developer.image = image
+        await developer.save()
+
+        res.status(200).json({status:200, message:'Developer id updated successfully'})
+    } catch (err) {
+        next(err)
+    }
+} 

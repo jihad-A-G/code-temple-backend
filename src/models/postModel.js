@@ -25,7 +25,7 @@ const postSchema = new mongoose.Schema({
         ref: "developer",
         required: true, 
         },
-})
+},{timestamps:true})
 
 const Post = mongoose.model('post',postSchema)
 

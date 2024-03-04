@@ -17,12 +17,21 @@ const developerSchema = new mongoose.Schema({
         type:String,
         required:false
     },
+    bio:{
+        type:String,
+        required:false
+    },
     isVerified:{
         type:Boolean,
         required:false,
         default:false
     },
-})
+    savedPost:[{
+        type:mongoose.Schema.Types.ObjectId,
+        required:false,
+        ref:'post'
+    }]
+},{timestamps:true})
 
 const Developer = mongoose.model('developer',developerSchema)
 
